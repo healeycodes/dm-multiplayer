@@ -4,9 +4,11 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -701,7 +703,6 @@ func main() {
 		width:  400,
 		height: 2,
 	})
-
 	level.entities.Append(&Wall{
 		x:      200,
 		y:      200,
@@ -714,9 +715,15 @@ func main() {
 
 	games = map[string]Game{"test": *game}
 
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
 	http.Handle("/", http.FileServer(http.FS(indexHTML)))
 	http.HandleFunc("/ws", handleConnections)
-	err := http.ListenAndServe(":8080", nil)
+	log.Println("listening on", port)
+	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		fmt.Println("ListenAndServe:", err)
 	}
