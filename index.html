@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game</title>
+    <style>
+        * {
+            font-family: monospace;
+        }
+
+        canvas {
+            border: 1px solid black;
+            user-select: none;
+        }
+
+        .game {
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .side {
+            padding-left: 16px;
+        }
+
+        .pb-24 {
+            padding-bottom: 24px;
+        }
+    </style>
+</head>
+
+<body>
+    <p>deathmatch mode. shoot other people to build up your score (lose points by getting shot!)</p>
+    <p>click to shoot, move with arrow keys or w/a/s/d</p>
+    <div class="game">
+        <canvas id="gameCanvas" width="800" height="800"></canvas>
+        <div class="side">
+            <div id="scoreboard" class="pb-24"></div>
+            <div id="debug"></div>
+        </div>
+    </div>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const socket = new WebSocket(`ws://${window.location.hostname || 'localhost'}:3000/ws`);
+        let gameLevel = null;
+
+        let prevMsgTime = Date.now();
+        let curMsgTime = Date.now()
+
+        socket.onopen = () => {
+            console.log('Connected to server');
+            let name = 'anon'
+            fetch('https://geolocation.microlink.io')
+                .then(r => r.json())
+                .then(json => { name = `${json?.city?.name}, ${json?.country?.flag}` })
+                .catch(e => console.error(e))
+                .finally(() => socket.send(JSON.stringify({ game: 'test', name })))
+        };
+
+        socket.onmessage = (event) => {
+            prevMsgTime = curMsgTime
+            curMsgTime = Date.now()
+            gameLevel = JSON.parse(event.data);
+            draw();
+        };
+
+        socket.onclose = () => {
+            console.log('Disconnected from server');
+        };
+
+        socket.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
+
+        const keyState = {};
+        let intervalId = null;
+
+        window.addEventListener('keydown', (event) => {
+            keyState[event.key] = true;
+            if (!intervalId) {
+                intervalId = setInterval(sendDirection, 8);
+            }
+        });
+
+        window.addEventListener('keyup', (event) => {
+            keyState[event.key] = false;
+            if (!Object.values(keyState).includes(true)) {
+                clearInterval(intervalId);
+                intervalId = null;
+                sendDirection(); // send one last update to stop movement
+            }
+        });
+
+        function sendDirection() {
+            const direction = { x: 0, y: 0 };
+            if (keyState['w'] || keyState['ArrowUp']) direction.y -= 1;
+            if (keyState['a'] || keyState['ArrowLeft']) direction.x -= 1;
+            if (keyState['s'] || keyState['ArrowDown']) direction.y += 1;
+            if (keyState['d'] || keyState['ArrowRight']) direction.x += 1;
+            socket.send(JSON.stringify({ type: 'direction', direction }));
+        }
+
+        window.addEventListener('click', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            const shoot = { x, y }
+            socket.send(JSON.stringify({ type: 'shoot', shoot }));
+        })
+
+        function draw() {
+            if (!gameLevel) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const scores = []
+            gameLevel.entities.forEach(entity => {
+                if (entity.type === 'character') {
+                    if (entity.you) {
+                        scores.push([entity.score, entity.name, '<-- you'])
+                    } else {
+                        scores.push([entity.score, entity.name])
+                    }
+
+                    ctx.font = '12px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillStyle = 'black';
+                    ctx.fillText(entity.name, entity.x + entity.width / 2, entity.y + entity.height + 15);
+                }
+
+                if (entity.you) {
+                    ctx.strokeStyle = entity.lastHit + 250 > gameLevel.timeMs ? 'red' : 'black';
+                    ctx.lineWidth = 1;
+                    const borderWidth = 1;
+                    const x = entity.x + borderWidth / 2;
+                    const y = entity.y + borderWidth / 2;
+                    const width = entity.width - borderWidth;
+                    const height = entity.height - borderWidth;
+                    ctx.strokeRect(x, y, width, height);
+                } else {
+                    ctx.fillStyle = entity.lastHit + 250 > gameLevel.timeMs ? 'red' : 'black';
+                    ctx.fillRect(entity.x, entity.y, entity.width, entity.height);
+                }
+            });
+
+            // Scores
+            scores.sort((a, b) => b[0] - a[0])
+            document.querySelector('#scoreboard').innerHTML = `<p><u>scores</u><br>${scores.map(score => score.join(' ')).join('<br>')}</p>`
+
+            if (Date.now() % 10 === 0) {
+                document.querySelector("#debug").innerHTML = `<p>
+                <u>debug</u>
+                <br>
+                round-trip time: ${Date.now() - gameLevel.timeMs}ms
+                <br>
+                server tick delay: ${gameLevel.tickTimeMs}ms
+                <br>
+                message gap: ${curMsgTime - prevMsgTime}ms
+                <br>
+                game entities: ${gameLevel.entities.length}
+                <br>
+            `
+            }
+        }
+    </script>
+</body>
+
+</html>
