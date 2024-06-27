@@ -27,7 +27,7 @@ func characterShoot(level *Level, character Entity, dx float64, dy float64) {
 		y:        character.Y() + (float64(character.Height()) / 4),
 		width:    8,
 		height:   8,
-		speed:    5,
+		speed:    4,
 		friction: 0.999,
 	}
 	bullet.SetVelocity(dx*bullet.Speed(), dy*bullet.Speed())
@@ -716,8 +716,7 @@ func main() {
 
 	http.Handle("/", http.FileServer(http.FS(indexHTML)))
 	http.HandleFunc("/ws", handleConnections)
-	fmt.Println("Server started at :3000")
-	err := http.ListenAndServe("localhost:3000", nil)
+	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		fmt.Println("ListenAndServe:", err)
 	}
