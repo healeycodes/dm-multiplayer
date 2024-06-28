@@ -148,7 +148,7 @@
 
             // Scores
             scores.sort((a, b) => b[0] - a[0])
-            document.querySelector('#scoreboard').innerHTML = `<p><u>scores</u><br>${scores.map(score => score.join(' ')).join('<br>')}</p>`
+            document.querySelector('#scoreboard').innerHTML = `<p><u>scoreboard</u><br>${scores.map(score => score.join(' ')).join('<br>')}</p>`
 
             if (Date.now() % 10 === 0) {
                 document.querySelector("#debug").innerHTML = `<p>
