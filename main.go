@@ -571,13 +571,13 @@ func (l *Level) toJSON(user Entity) ([]byte, error) {
 		entities = append(entities, entitySlim)
 	})
 	return json.Marshal(struct {
-		Time     float64      `json:"timeMs"`
+		Time     int          `json:"timeMs"`
 		TickTime float64      `json:"tickTimeMs"`
 		Width    int          `json:"width"`
 		Height   int          `json:"height"`
 		Entities []EntitySlim `json:"entities"`
 	}{
-		Time:     float64(time.Now().UnixMilli()),
+		Time:     int(time.Now().UnixMilli()),
 		TickTime: l.tickTime,
 		Width:    l.width,
 		Height:   l.height,
