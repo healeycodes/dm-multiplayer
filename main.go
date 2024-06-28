@@ -37,7 +37,6 @@ func characterShoot(level *Level, character Entity, dx float64, dy float64) {
 }
 
 func (level *Level) tick() {
-	t := time.Now()
 	level.entities.Iterate(func(entity Entity) {
 		// Apply velocity to position
 		newX := entity.X() + entity.VelocityX()
@@ -86,7 +85,6 @@ func (level *Level) tick() {
 		entity.SetVelocity(entity.VelocityX()*entity.Friction(), entity.VelocityY()*entity.Friction())
 	})
 	level.entities.RemoveInactive()
-	level.tickTime = float64(time.Since(t).Milliseconds())
 }
 
 type Game struct {
@@ -572,7 +570,7 @@ func (l *Level) toJSON(user Entity) ([]byte, error) {
 	})
 	return json.Marshal(struct {
 		Time     int          `json:"timeMs"`
-		TickTime float64      `json:"tickTimeMs"`
+		TickTime float64      `json:"tickTimeUs"`
 		Width    int          `json:"width"`
 		Height   int          `json:"height"`
 		Entities []EntitySlim `json:"entities"`
@@ -678,7 +676,9 @@ var games map[string]Game
 func gameLoop(game *Game) {
 	for {
 		time.Sleep(time.Second / 120)
+		t := time.Now()
 		game.level.tick()
+		game.level.tickTime = float64(time.Since(t).Microseconds())
 	}
 }
 

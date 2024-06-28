@@ -154,9 +154,9 @@
                 document.querySelector("#debug").innerHTML = `<p>
                 <u>debug</u>
                 <br>
-                round-trip time: ${Date.now() - gameLevel.timeMs}ms
+                server->client: ${Date.now() - gameLevel.timeMs}ms
                 <br>
-                server tick delay: ${gameLevel.tickTimeMs}ms
+                server tick: ${gameLevel.tickTimeUs}μs
                 <br>
                 message gap: ${curMsgTime - prevMsgTime}ms
                 <br>
