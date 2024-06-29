@@ -79,18 +79,29 @@
         let intervalId = null;
 
         window.addEventListener('keydown', (event) => {
+
+            // Avoid input delay by sending this ASAP
+            sendDirection(); 
+
             keyState[event.key] = true;
             if (!intervalId) {
+
+                // Handle player holding down the key
                 intervalId = setInterval(sendDirection, 8);
             }
         });
 
         window.addEventListener('keyup', (event) => {
             keyState[event.key] = false;
+
+            // If no keys are pressed
+            // stop sending "key held down" updates
             if (!Object.values(keyState).includes(true)) {
                 clearInterval(intervalId);
                 intervalId = null;
-                sendDirection(); // send one last update to stop movement
+
+                // Send one last update to stop movement
+                sendDirection(); 
             }
         });
 

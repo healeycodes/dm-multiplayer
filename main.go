@@ -36,7 +36,7 @@ func characterShoot(level *Level, character Entity, dx float64, dy float64) {
 	level.entities.Append(bullet)
 }
 
-func (level *Level) tick() {
+func (level *Level) loop() {
 	level.entities.Iterate(func(entity Entity) {
 		// Apply velocity to position
 		newX := entity.X() + entity.VelocityX()
@@ -128,7 +128,6 @@ func (el *EntityList) SpawnEntity(level *Level, entity Entity) {
 	defer el.mu.Unlock()
 
 	startTime := time.Now()
-
 	for {
 		// Generate random position within level bounds
 		x := rand.Float64() * float64(level.width-entity.Width())
@@ -155,8 +154,8 @@ func (el *EntityList) SpawnEntity(level *Level, entity Entity) {
 			return
 		}
 
-		// Check if 100ms has passed
-		if time.Since(startTime) > 100*time.Millisecond {
+		// Check if 5 has passed
+		if time.Since(startTime) > 5*time.Millisecond {
 			// Unlock and wait for 500ms before trying again
 			el.mu.Unlock()
 			time.Sleep(500 * time.Millisecond)
@@ -677,7 +676,7 @@ func gameLoop(game *Game) {
 	for {
 		time.Sleep(time.Second / 120)
 		t := time.Now()
-		game.level.tick()
+		game.level.loop()
 		game.level.tickTime = float64(time.Since(t).Microseconds())
 	}
 }
