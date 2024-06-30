@@ -1,6 +1,5 @@
 # dm-multiplayer
-> My blog post:
-> - [2D Multiplayer From Scratch](https://healeycodes.com/2d-multiplayer-from-scratch)
+> My blog post: [2D Multiplayer From Scratch](https://healeycodes.com/2d-multiplayer-from-scratch)
 
 A game prototype for a 2D arena shooter. About 4-5 hours of work.
 
