@@ -4,7 +4,7 @@
 
 A game prototype for a 2D arena shooter. About 4-5 hours of work.
 
-<img src="https://github.com/healeycodes/dm-multiplayer/blob/main/gameplay.mp4" alt="dm-multiplayer gameplay – two players chasing and shooting each other.">
+https://github.com/healeycodes/dm-multiplayer/assets/34559231/b58bee52-8939-4018-bc0b-d1497034dc28
 
 See the blog post linked at the top for in-depth notes.
 
