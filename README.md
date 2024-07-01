@@ -3,7 +3,7 @@
 
 <br>
 
-A game prototype for a 2D arena shooter. About 4-5 hours of work.
+A game prototype for a multiplayer 2D arena shooter. About 4-5 hours of work.
 
 <img src="https://github.com/healeycodes/dm-multiplayer/blob/main/gameplay.gif" alt="dm-multiplayer gameplay – two players chasing and shooting each other.">
 
